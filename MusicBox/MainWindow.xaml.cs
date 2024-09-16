@@ -181,6 +181,10 @@ namespace MusicBox
                         if (token.IsCancellationRequested) break;
                     }
                 }
+                
+                // play out the rest of the buffer
+                while (waveProvider.BufferedDuration.TotalSeconds > 0)
+                    await Task.Delay(100, token);
             }
 
             // clean up
