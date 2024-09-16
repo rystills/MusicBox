@@ -172,6 +172,16 @@ namespace MusicBox
                 waveOut.Init(waveProvider);
                 waveOut.Play();
 
+                // sync volume to slider
+                Task updateVolumeTask = Task.Run(async () =>
+                {
+                    while (!token.IsCancellationRequested)
+                    {
+                        await Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)VolumeSlider.Value; });
+                        Task.Delay(50).Wait();
+                    }
+                });
+
                 using (Stream pcmStream = ffmpegProcess.StandardOutput.BaseStream)
                 {
                     byte[] buffer = new byte[4096];
