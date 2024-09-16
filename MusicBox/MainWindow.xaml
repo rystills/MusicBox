@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MusicBox"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        MouseWheel="Window_MouseWheel">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150" />
@@ -14,16 +15,16 @@
 
         <!-- Playlists -->
         <StackPanel Grid.Column="0" Margin="5">
-            <Label Content="Add From URL"/> <TextBox KeyDown="AddFromURL_KeyDown" />
+            <Label Content="Add Song From URL"/> <TextBox KeyDown="AddSongFromURL_KeyDown" />
             <Label Content="New Playlist"/> <TextBox KeyDown="NewPlaylist_KeyDown" />
             
             <Label Content="Playlists:"/>
-            <ListBox Name="Playlists" SelectionChanged="Playlists_SelectionChanged" Margin="5,10,0,0" />
+            <ListBox Name="Playlists" SelectionChanged="Playlists_SelectionChanged" Margin="5" />
         </StackPanel>
 
         <!-- Playlist Contents -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <Grid Name="ImageGrid" />
+            <WrapPanel x:Name="ImageWrapPanel" Orientation="Horizontal" />
         </ScrollViewer>
     </Grid>
 </Window>

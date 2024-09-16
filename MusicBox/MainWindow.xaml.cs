@@ -24,6 +24,7 @@ namespace MusicBox
         private string ytdlPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\yt-dlp.exe";
         private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
         private CancellationTokenSource cancellationTokenSource;
+        private float gridScale = 100;
 
         public MainWindow()
         {
@@ -67,7 +68,21 @@ namespace MusicBox
             }
         }
 
-        private void AddFromURL_KeyDown(object sender, KeyEventArgs e)
+        private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // resize thumbnail grid
+                gridScale = Math.Max(1, gridScale + e.Delta * .1f);
+                foreach (Image img in ImageWrapPanel.Children)
+                {
+                    img.Height = gridScale;
+                    img.Width = gridScale * (img.Width / img.Height);
+                }
+            }
+        }
+
+        private void AddSongFromURL_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox input = sender as TextBox;
             if (Playlists.SelectedItem != null && !string.IsNullOrEmpty(input.Text))
@@ -102,17 +117,9 @@ namespace MusicBox
 
         private void ReloadThumbnails(IEnumerable<string> paths)
         {
-            int numColumns = 3;
-            int numRows = (int)Math.Ceiling((float)paths.Count() / numColumns);
+            ImageWrapPanel.Children.Clear();
 
-            // Define grid rows and columns
-            ImageGrid.RowDefinitions.Clear();
-            ImageGrid.ColumnDefinitions.Clear();
-            ImageGrid.Children.Clear();
-            for (int i = 0; i < numRows; ++i) ImageGrid.RowDefinitions.Add(new RowDefinition());
-            for (int i = 0; i < numColumns; ++i) ImageGrid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            // Add images to the grid
+            // add clickable thumbnail images
             for (int i = 0; i < paths.Count(); ++i)
             {
                 string fullImagePath = Path.Combine(baseDirectory, paths.ElementAt(i) + ".png");
@@ -120,21 +127,14 @@ namespace MusicBox
                 if (!File.Exists(fullImagePath)) MessageBox.Show($"Image not found: {fullImagePath}");
                 else 
                 {
-                    // Create a new Image control
                     Image img = new Image();
                     img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".opus");
                     img.Source = new BitmapImage(new Uri(fullImagePath));
-                    img.Height = 100; // Adjust size as necessary
-                    img.Width = 100;
-                    img.Margin = new Thickness(5);
-
-                    // Add the image to the correct grid position
-                    Grid.SetRow(img, i / numColumns);
-                    Grid.SetColumn(img, i % numColumns);
-                    
+                    img.Height = gridScale;
+                    img.Width = gridScale * (img.Width / img.Height);
+                    img.Stretch = System.Windows.Media.Stretch.Uniform;
                     img.MouseDown += (o, e) => { PlaySongAsync(img.Tag.ToString()); };
-
-                    ImageGrid.Children.Add(img);
+                    ImageWrapPanel.Children.Add(img);
                 }
             }
         }
