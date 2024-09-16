@@ -9,9 +9,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Input;
 using System.Linq;
 using System.Collections.Generic;
-using Thread = System.Threading.Thread;
 using YoutubeDLSharp.Options;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace MusicBox
 {
@@ -23,6 +23,7 @@ namespace MusicBox
         private string baseDirectory;
         private string ytdlPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\yt-dlp.exe";
         private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
+        private CancellationTokenSource cancellationTokenSource;
 
         public MainWindow()
         {
@@ -140,8 +141,13 @@ namespace MusicBox
 
         private async Task PlaySongAsync(string path)
         {
+            StopCurrentSong();
             const int SampleRate = 48000;
             const int Channels = 2;
+
+            // init cancellation token
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
 
             // start quiet ffmpeg process to decode audio file
             Process ffmpegProcess = new Process { StartInfo = new ProcessStartInfo
@@ -170,14 +176,19 @@ namespace MusicBox
 
                         // wait for the buffer to empty a bit before refilling
                         while (waveProvider.BufferedDuration.TotalSeconds > 4) await Task.Delay(100);
+
+                        // stop playback early
+                        if (token.IsCancellationRequested) break;
                     }
                 }
             }
 
             // clean up
-            await Task.Run(() => ffmpegProcess.WaitForExit());
+            await Task.Run(() => ffmpegProcess.WaitForExit(), token);
             ffmpegProcess.Dispose();
         }
+
+        private void StopCurrentSong() => cancellationTokenSource?.Cancel();
 
         private void AddSongToPlaylist(string songPath)
             => File.AppendAllText(Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox"),
