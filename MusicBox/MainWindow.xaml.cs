@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using YoutubeDLSharp.Options;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Text.RegularExpressions;
 
 namespace MusicBox
 {
@@ -29,6 +28,7 @@ namespace MusicBox
         private Random random = new Random();
         private float gridScale = 100;
         private string currentSongPath;
+        private DateTime playbackStartTime;
 
         public MainWindow()
         {
@@ -201,9 +201,8 @@ namespace MusicBox
             {
                 while (!token.IsCancellationRequested)
                 {
-                    // TODO: correct for drift
-                    Dispatcher.InvokeAsync(() => { PositionSlider.Value += 0.1; });
-                    await Task.Delay(100);
+                    Dispatcher.InvokeAsync(() => { UpdatePositionSlider(); });
+                    await Task.Delay(50);
                 }
             });
 
@@ -213,6 +212,7 @@ namespace MusicBox
                 BufferedWaveProvider waveProvider = new BufferedWaveProvider(new WaveFormat(SampleRate, Channels)) { BufferDuration = TimeSpan.FromSeconds(5) };
                 waveOut.Init(waveProvider);
                 waveOut.Play();
+                playbackStartTime = DateTime.Now.AddSeconds(-startTime);
 
                 // sync volume to slider
                 Task updateVolumeTask = Task.Run(async () =>
@@ -250,6 +250,20 @@ namespace MusicBox
             ActiveSongLabel.Content = "Active Song:";
             ffmpegProcess.Dispose();
             PlayRandomSong();
+        }
+
+        private void UpdatePositionSlider()
+        {
+            if (!PositionSlider.IsMouseCaptureWithin)
+            {
+                // recalculate position
+                TimeSpan elapsedTime = DateTime.Now - playbackStartTime;
+                double progress = elapsedTime.TotalSeconds / PositionSlider.Maximum;
+                progress = Math.Max(0, Math.Min(1, progress));
+
+                // apply
+                PositionSlider.Value = progress * PositionSlider.Maximum;
+            }
         }
 
         private void PlayRandomSong()
