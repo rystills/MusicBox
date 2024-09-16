@@ -142,6 +142,7 @@ namespace MusicBox
         private async Task PlaySongAsync(string path)
         {
             StopCurrentSong();
+            ActiveSongLabel.Content = $"Active Song: {Path.GetFileNameWithoutExtension(path)}";
             const int SampleRate = 48000;
             const int Channels = 2;
 
@@ -187,12 +188,18 @@ namespace MusicBox
                     await Task.Delay(100, token);
             }
 
-            // clean up
             await Task.Run(() => ffmpegProcess.WaitForExit(), token);
+
+            // clean up
+            ActiveSongLabel.Content = "Active Song:";
             ffmpegProcess.Dispose();
         }
 
-        private void StopCurrentSong() => cancellationTokenSource?.Cancel();
+        private void StopCurrentSong()
+        {
+            cancellationTokenSource?.Cancel();
+            ActiveSongLabel.Content = "Active Song:";
+        }
 
         private void AddSongToPlaylist(string songPath)
             => File.AppendAllText(Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox"),

@@ -12,9 +12,13 @@
             <ColumnDefinition Width="150" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
 
         <!-- Playlists -->
-        <StackPanel Grid.Column="0" Margin="5">
+        <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="5">
             <Label Content="Add Song From URL"/> <TextBox KeyDown="AddSongFromURL_KeyDown" />
             <Label Content="New Playlist"/> <TextBox KeyDown="NewPlaylist_KeyDown" />
             
@@ -22,9 +26,12 @@
             <ListBox Name="Playlists" SelectionChanged="Playlists_SelectionChanged" Margin="5" />
         </StackPanel>
 
-        <!-- Playlist Contents -->
+        <!-- Songs in Playlist -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <WrapPanel x:Name="ImageWrapPanel" Orientation="Horizontal" />
+            <WrapPanel Name="ImageWrapPanel" Orientation="Horizontal" />
         </ScrollViewer>
+        
+        <!-- Active Song Info -->
+        <Label Name="ActiveSongLabel" Grid.Row="1" Grid.Column="1" Content="Active Song:"/>
     </Grid>
 </Window>
