@@ -84,11 +84,15 @@ namespace MusicBox
 
         private void AddSongFromURL_KeyDown(object sender, KeyEventArgs e)
         {
-            TextBox input = sender as TextBox;
-            if (Playlists.SelectedItem != null && !string.IsNullOrEmpty(input.Text))
+            if (e.Key == Key.Enter)
             {
-                DownloadSong(input.Text);
-                input.Text = string.Empty;
+                TextBox input = sender as TextBox;
+
+                if (Playlists.SelectedItem != null && !string.IsNullOrEmpty(input.Text))
+                {
+                    DownloadSong(input.Text);
+                    input.Text = string.Empty;
+                }
             }
         }
 
@@ -213,5 +217,8 @@ namespace MusicBox
             AddSongToPlaylist(res.Data);
             ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
         }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+            => StopCurrentSong();
     }
 }

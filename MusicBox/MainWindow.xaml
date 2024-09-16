@@ -14,7 +14,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
 
         <!-- Playlists -->
@@ -32,6 +32,13 @@
         </ScrollViewer>
         
         <!-- Active Song Info -->
-        <Label Name="ActiveSongLabel" Grid.Row="1" Grid.Column="1" Content="Active Song:"/>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Name="ActiveSongLabel" Content="Active Song:"/>
+            <Button Grid.Row="1" Content="Stop" Click="Stop_Click"/>
+        </Grid>
     </Grid>
 </Window>
