@@ -11,6 +11,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Thread = System.Threading.Thread;
 using YoutubeDLSharp.Options;
+using System.Threading.Tasks;
 
 namespace MusicBox
 {
@@ -130,14 +131,14 @@ namespace MusicBox
                     Grid.SetRow(img, i / numColumns);
                     Grid.SetColumn(img, i % numColumns);
                     
-                    img.MouseDown += (o, e) => { PlaySong(img.Tag.ToString()); };
+                    img.MouseDown += (o, e) => { PlaySongAsync(img.Tag.ToString()); };
 
                     ImageGrid.Children.Add(img);
                 }
             }
         }
 
-        private void PlaySong(string path)
+        private async Task PlaySongAsync(string path)
         {
             const int SampleRate = 48000;
             const int Channels = 2;
@@ -168,13 +169,13 @@ namespace MusicBox
                         waveProvider.AddSamples(buffer, 0, bytesRead);
 
                         // wait for the buffer to empty a bit before refilling
-                        while (waveProvider.BufferedDuration.TotalSeconds > 4) Thread.Sleep(100);
+                        while (waveProvider.BufferedDuration.TotalSeconds > 4) await Task.Delay(100);
                     }
                 }
             }
 
             // clean up
-            ffmpegProcess.WaitForExit();
+            await Task.Run(() => ffmpegProcess.WaitForExit());
             ffmpegProcess.Dispose();
         }
 
