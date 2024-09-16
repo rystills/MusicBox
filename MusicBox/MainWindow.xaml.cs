@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using YoutubeDLSharp.Options;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace MusicBox
 {
@@ -23,9 +24,11 @@ namespace MusicBox
         private string baseDirectory;
         private string ytdlPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\yt-dlp.exe";
         private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
+        private string ffprobePath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffprobe.exe";
         private CancellationTokenSource cancellationTokenSource;
         private Random random = new Random();
         private float gridScale = 100;
+        private string currentSongPath;
 
         public MainWindow()
         {
@@ -136,19 +139,47 @@ namespace MusicBox
                     img.Source = new BitmapImage(new Uri(fullImagePath));
                     img.Height = gridScale;
                     img.Width = gridScale * (img.Width / img.Height);
-                    img.Stretch = System.Windows.Media.Stretch.Uniform;
                     img.MouseDown += (o, e) => { PlaySongAsync(img.Tag.ToString()); };
                     ImageWrapPanel.Children.Add(img);
                 }
             }
         }
 
-        private async Task PlaySongAsync(string path)
+        private double GetSongDuration(string path)
+        {
+            // run ffprobe
+            Process ffprobeProcess = new Process { StartInfo = new ProcessStartInfo
+            {
+                FileName = ffprobePath,
+                Arguments = $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\"",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            } };
+            ffprobeProcess.Start();
+
+            // parse result
+            string output = ffprobeProcess.StandardOutput.ReadToEnd();
+            ffprobeProcess.WaitForExit();
+
+            if (double.TryParse(output.Trim(), out double duration))
+                return duration;
+            return 0;
+        }
+
+        private void PositionSlider_MouseUp(object sender, MouseButtonEventArgs e)
+        => PlaySongAsync(currentSongPath, (float)PositionSlider.Value);
+
+        private async Task PlaySongAsync(string path, float startTime = 0)
         {
             StopCurrentSong();
+            currentSongPath = path;
             ActiveSongLabel.Content = $"Active Song: {Path.GetFileNameWithoutExtension(path)}";
             const int SampleRate = 48000;
             const int Channels = 2;
+
+            PositionSlider.Maximum = GetSongDuration(path);
+            PositionSlider.Value = startTime;
 
             // init cancellation token
             cancellationTokenSource = new CancellationTokenSource();
@@ -158,12 +189,23 @@ namespace MusicBox
             Process ffmpegProcess = new Process { StartInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
-                Arguments = $"-i \"{path}\" -f s16le -ar {SampleRate} -ac {Channels} pipe:1",
+                Arguments = $"-ss {startTime} -i \"{path}\" -f s16le -ar {SampleRate} -ac {Channels} pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
             } };
             ffmpegProcess.Start();
+
+            // sync position slider to position
+            Task updateSliderTask = Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    // TODO: correct for drift
+                    Dispatcher.InvokeAsync(() => { PositionSlider.Value += 0.1; });
+                    await Task.Delay(100);
+                }
+            });
 
             // pipe PCM data from ffmpeg to naudio
             using (WaveOutEvent waveOut = new WaveOutEvent())
@@ -177,8 +219,8 @@ namespace MusicBox
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        await Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)VolumeSlider.Value; });
-                        Task.Delay(50).Wait();
+                        Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)VolumeSlider.Value; });
+                        await Task.Delay(50);
                     }
                 });
 
