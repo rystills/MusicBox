@@ -7,6 +7,23 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Playlists -->
+        <StackPanel Grid.Column="0" Margin="5">
+            <Label Content="Add From URL"/> <TextBox KeyDown="AddFromURL_KeyDown" />
+            <Label Content="New Playlist"/> <TextBox KeyDown="NewPlaylist_KeyDown" />
+            
+            <Label Content="Playlists:"/>
+            <ListBox Name="Playlists" SelectionChanged="Playlists_SelectionChanged" Margin="5,10,0,0" />
+        </StackPanel>
+
+        <!-- Playlist Contents -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <Grid Name="ImageGrid" />
+        </ScrollViewer>
     </Grid>
 </Window>
