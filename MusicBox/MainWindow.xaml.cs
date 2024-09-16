@@ -24,6 +24,7 @@ namespace MusicBox
         private string ytdlPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\yt-dlp.exe";
         private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
         private CancellationTokenSource cancellationTokenSource;
+        private Random random = new Random();
         private float gridScale = 100;
 
         public MainWindow()
@@ -63,8 +64,7 @@ namespace MusicBox
                     MessageBox.Show("Error: playlist does not exist");
 
                 // display playlist contents
-                else
-                    ReloadThumbnails(File.ReadLines(path));
+                else ReloadThumbnails(File.ReadLines(path));
             }
         }
 
@@ -197,6 +197,13 @@ namespace MusicBox
             // clean up
             ActiveSongLabel.Content = "Active Song:";
             ffmpegProcess.Dispose();
+            PlayRandomSong();
+        }
+
+        private void PlayRandomSong()
+        {
+            int songInd = random.Next(ImageWrapPanel.Children.Count);
+            PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
         }
 
         private void StopCurrentSong()
