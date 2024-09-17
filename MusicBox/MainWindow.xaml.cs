@@ -299,7 +299,14 @@ namespace MusicBox
             ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e)
-            => StopCurrentSong();
+        private void Pause_Click(object sender, RoutedEventArgs e)
+        {
+            // unpause
+            if (cancellationTokenSource.IsCancellationRequested)
+                PositionSlider_MouseUp(null, null);
+            
+            // pause
+            else StopCurrentSong();
+        } 
     }
 }

@@ -45,7 +45,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Label Name="ActiveSongLabel" Grid.ColumnSpan="5" Content="Active Song:"/>
-            <Button Grid.Row="1" Content="Stop" Click="Stop_Click"/>
+            <Button Grid.Row="1" Content="Pause" Click="Pause_Click"/>
             <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="1" Content="Volume: [050/100]"/>
             <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="2" PreviewMouseMove="VolumeSlider_MouseMove"
                 Minimum="0" Maximum="1" Value=".5"
