@@ -38,7 +38,8 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -46,12 +47,17 @@
             </Grid.ColumnDefinitions>
             <Label Name="ActiveSongLabel" Grid.ColumnSpan="5" Content="Active Song:"/>
             <Button Grid.Row="1" Content="Pause" Click="Pause_Click"/>
-            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="1" Content="Volume: [050/100]"/>
-            <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="2" PreviewMouseMove="VolumeSlider_MouseMove"
-                Minimum="0" Maximum="1" Value=".5"
+            <ComboBox Name="EndBehavior" Grid.Row="1" Grid.Column="1" SelectedIndex="2">
+                <ComboBoxItem Content="1"/>
+                <ComboBoxItem Content="∞"/>
+                <ComboBoxItem Content="?"/>
+            </ComboBox>
+            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [020/100]"/>
+            <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewMouseMove="VolumeSlider_MouseMove"
+                Minimum="0" Maximum="1" Value=".2"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
-            <Label Name="PositionLabel" Grid.Row="1" Grid.Column="3" Content="Position: [0000/0000]"/>
-            <Slider Name="PositionSlider" Grid.Row="1" Grid.Column="4" PreviewMouseMove="PositionSlider_MouseMove" PreviewMouseUp="PositionSlider_MouseUp"
+            <Label Name="PositionLabel" Grid.Row="1" Grid.Column="4" Content="Position: [0000/0000]"/>
+            <Slider Name="PositionSlider" Grid.Row="1" Grid.Column="5" PreviewMouseMove="PositionSlider_MouseMove" PreviewMouseUp="PositionSlider_MouseUp"
                 Minimum="0" Maximum="1" Value="0"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
         </Grid>

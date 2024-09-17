@@ -260,7 +260,25 @@ namespace MusicBox
 
             // clean up
             ffmpegProcess.Dispose();
-            PlayRandomSong();
+
+            // end behavior
+            switch ((EndBehavior.SelectedItem as ContentControl).Content.ToString())
+            {
+                // play once
+                case "1":
+                default:
+                    break;
+
+                // play looped
+                case "∞":
+                    PlaySongAsync(currentSongPath);
+                    break;
+
+                // play random
+                case "?":
+                    PlayRandomSong();
+                    break;
+            }
         }
 
         private void UpdatePositionSlider()
