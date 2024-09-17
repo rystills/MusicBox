@@ -136,6 +136,8 @@ namespace MusicBox
                 {
                     Image img = new Image();
                     img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".opus");
+                    if (!File.Exists(img.Tag.ToString()))
+                        img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".m4a");
                     img.Source = new BitmapImage(new Uri(fullImagePath));
                     img.Height = gridScale;
                     img.Width = gridScale * (img.Width / img.Height);
