@@ -87,11 +87,11 @@ namespace MusicBox
 
         private void AddSongFromURL_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            TextBox input = sender as TextBox;
+            
+            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(input.Text))
             {
-                TextBox input = sender as TextBox;
-
-                if (Playlists.SelectedItem != null && !string.IsNullOrEmpty(input.Text))
+                if (Playlists.SelectedItem != null)
                 {
                     DownloadSong(input.Text);
                     input.Text = string.Empty;
@@ -101,10 +101,10 @@ namespace MusicBox
 
         private void NewPlaylist_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            TextBox input = sender as TextBox;
+            
+            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(input.Text))
             {
-                TextBox input = sender as TextBox;
-                
                 // verify playlist doesn't already exist
                 string path = Path.Combine(baseDirectory, input.Text + ".mbox");
                 if (File.Exists(path))
@@ -141,7 +141,11 @@ namespace MusicBox
                     img.Source = new BitmapImage(new Uri(fullImagePath));
                     img.Height = gridScale;
                     img.Width = gridScale * (img.Width / img.Height);
-                    img.MouseDown += (o, e) => { PlaySongAsync(img.Tag.ToString()); };
+                    img.MouseDown += (o, e) => 
+                    {
+                        if (img.Tag == currentSongPath) Pause_Click(null, null);
+                        else PlaySongAsync(img.Tag.ToString());
+                    };
                     ImageWrapPanel.Children.Add(img);
                 }
             }
