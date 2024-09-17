@@ -169,8 +169,14 @@ namespace MusicBox
             return 0;
         }
 
+        private void VolumeSlider_MouseMove(object sender, MouseEventArgs e)
+            => VolumeLabel.Content = $"Volume: [{((int)(VolumeSlider.Value*100)).ToString("D3")}/100]";
+        
+        private void PositionSlider_MouseMove(object sender, MouseEventArgs e)
+            => PositionLabel.Content = $"Position: [{((int)PositionSlider.Value).ToString("D4")}/{((int)PositionSlider.Maximum).ToString("D4")}]";
+
         private void PositionSlider_MouseUp(object sender, MouseButtonEventArgs e)
-        => PlaySongAsync(currentSongPath, (float)PositionSlider.Value);
+            => PlaySongAsync(currentSongPath, (float)PositionSlider.Value);
 
         private async Task PlaySongAsync(string path, float startTime = 0)
         {
@@ -249,7 +255,6 @@ namespace MusicBox
             await Task.Run(() => ffmpegProcess.WaitForExit(), token);
 
             // clean up
-            ActiveSongLabel.Content = "Active Song:";
             ffmpegProcess.Dispose();
             PlayRandomSong();
         }
@@ -266,6 +271,8 @@ namespace MusicBox
                 // apply
                 PositionSlider.Value = progress * PositionSlider.Maximum;
             }
+
+            PositionSlider_MouseMove(null, null);
         }
 
         private void PlayRandomSong()
@@ -277,7 +284,6 @@ namespace MusicBox
         private void StopCurrentSong()
         {
             cancellationTokenSource?.Cancel();
-            ActiveSongLabel.Content = "Active Song:";
         }
 
         private void AddSongToPlaylist(string songPath)
