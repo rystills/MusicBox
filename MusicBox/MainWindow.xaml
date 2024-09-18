@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:MusicBox"
         mc:Ignorable="d"
         Title="Music Box" Height="450" Width="800"
-        PreviewMouseWheel="Window_MouseWheel">
+        PreviewMouseWheel="Window_MouseWheel"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <!-- global key events -->
     <Window.CommandBindings>

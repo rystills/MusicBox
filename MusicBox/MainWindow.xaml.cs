@@ -84,6 +84,16 @@ namespace MusicBox
             }
         }
 
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // spacebar pauses the song unless we're typing into a TextBox
+            if (e.Key == Key.Space && !(Keyboard.FocusedElement is TextBox))
+            {
+                Pause_Click(null, null);
+                e.Handled = true;
+            }
+        }
+
         private void NewPlaylist_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox input = sender as TextBox;
