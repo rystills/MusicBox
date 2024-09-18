@@ -7,6 +7,12 @@
         mc:Ignorable="d"
         Title="Music Box" Height="450" Width="800"
         MouseWheel="Window_MouseWheel">
+
+    <!-- global key events -->
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Paste" Executed="PasteCommand_Executed"/>
+    </Window.CommandBindings>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150" />
@@ -19,9 +25,7 @@
 
         <!-- Playlists -->
         <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="5">
-            <Label Content="Add Song From URL"/> <TextBox KeyDown="AddSongFromURL_KeyDown" />
             <Label Content="New Playlist"/> <TextBox KeyDown="NewPlaylist_KeyDown" />
-            
             <Label Content="Playlists:"/>
             <ListBox Name="Playlists" SelectionChanged="Playlists_SelectionChanged" Margin="5" />
         </StackPanel>

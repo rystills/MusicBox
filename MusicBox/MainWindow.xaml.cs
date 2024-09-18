@@ -63,7 +63,7 @@ namespace MusicBox
 
                 // verify playlist exists
                 if (!File.Exists(path))
-                    MessageBox.Show("Error: playlist does not exist");
+                    MessageBox.Show($"Error: playlist '{path}' does not exist");
 
                 // display playlist contents
                 else ReloadThumbnails(File.ReadLines(path));
@@ -84,17 +84,6 @@ namespace MusicBox
             }
         }
 
-        private void AddSongFromURL_KeyDown(object sender, KeyEventArgs e)
-        {
-            TextBox input = sender as TextBox;
-            
-            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(input.Text) && Playlists.SelectedItem != null)
-            {
-                DownloadSong(input.Text);
-                input.Text = string.Empty;
-            }
-        }
-
         private void NewPlaylist_KeyDown(object sender, KeyEventArgs e)
         {
             TextBox input = sender as TextBox;
@@ -104,7 +93,7 @@ namespace MusicBox
                 // verify playlist doesn't already exist
                 string path = Path.Combine(baseDirectory, input.Text + ".mbox");
                 if (File.Exists(path))
-                    MessageBox.Show("Error: playlist already exists");
+                    MessageBox.Show($"Error: playlist '{path}' already exists");
                 
                 // create new playlist
                 else
@@ -221,8 +210,15 @@ namespace MusicBox
         private void PositionSlider_MouseUp(object sender, MouseButtonEventArgs e)
             => PlaySongAsync(currentSongPath, PositionSlider.Value);
 
+        private void PasteCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Playlists.SelectedItem != null && Clipboard.ContainsText())
+                DownloadSong(Clipboard.GetText());
+        }
+
         private async Task PlaySongAsync(string path, double startTime = 0)
         {
+            if (string.IsNullOrWhiteSpace(path)) return;
             StopCurrentSong();
             currentSongPath = path;
             string songName = Path.GetFileNameWithoutExtension(path);
@@ -358,8 +354,13 @@ namespace MusicBox
             // download song and add to current playlist
             var ytdl = new YoutubeDL { YoutubeDLPath = ytdlPath, FFmpegPath = ffmpegPath };
             var res = await ytdl.RunAudioDownload(url, overrideOptions: new OptionSet() { WriteThumbnail = true, ConvertThumbnails = "png" });
-            AddSongToPlaylist(res.Data);
-            ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
+            if (string.IsNullOrWhiteSpace(res.Data))
+                MessageBox.Show($"Error: failed to download '{url}'");
+            else
+            {
+                AddSongToPlaylist(res.Data);
+                ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
+            }
         }
 
         private void Pause_Click(object sender, RoutedEventArgs e)
