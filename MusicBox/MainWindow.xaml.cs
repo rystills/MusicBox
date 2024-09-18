@@ -320,7 +320,7 @@ namespace MusicBox
         private void Pause_Click(object sender, RoutedEventArgs e)
         {
             // unpause
-            if (cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
                 PositionSlider_MouseUp(null, null);
             
             // pause
