@@ -171,14 +171,57 @@ namespace MusicBox
 
         private void VolumeSlider_MouseMove(object sender, MouseEventArgs e)
             => VolumeLabel.Content = $"Volume: [{((int)(VolumeSlider.Value*100)).ToString("D3")}/100]";
-        
+
+        private void VolumeSlider_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                // right/up increments by LargeChange
+                case Key.Right:
+                case Key.Up:
+                    VolumeSlider.Value = Math.Min(VolumeSlider.Maximum, VolumeSlider.Value + VolumeSlider.LargeChange);
+                    goto Handler;
+
+                // left/down decrements by LargeChange
+                case Key.Left:
+                case Key.Down:
+                    VolumeSlider.Value = Math.Max(VolumeSlider.Minimum, VolumeSlider.Value - VolumeSlider.LargeChange);
+
+            Handler:
+                    VolumeSlider_MouseMove(null, null);
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        private void PositionSlider_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                // right/up increments by LargeChange
+                case Key.Right:
+                case Key.Up:
+                    PlaySongAsync(currentSongPath, (float)PositionSlider.Value + PositionSlider.LargeChange);
+                    goto Handler;
+
+                // left/down decrements by LargeChange
+                case Key.Left:
+                case Key.Down:
+                    PlaySongAsync(currentSongPath, (float)PositionSlider.Value - PositionSlider.LargeChange);
+
+                Handler:
+                    e.Handled = true;
+                    break;
+            }
+        }
+
         private void PositionSlider_MouseMove(object sender, MouseEventArgs e)
             => PositionLabel.Content = $"Position: [{((int)PositionSlider.Value).ToString("D4")}/{((int)PositionSlider.Maximum).ToString("D4")}]";
 
         private void PositionSlider_MouseUp(object sender, MouseButtonEventArgs e)
-            => PlaySongAsync(currentSongPath, (float)PositionSlider.Value);
+            => PlaySongAsync(currentSongPath, PositionSlider.Value);
 
-        private async Task PlaySongAsync(string path, float startTime = 0)
+        private async Task PlaySongAsync(string path, double startTime = 0)
         {
             StopCurrentSong();
             currentSongPath = path;

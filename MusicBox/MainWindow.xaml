@@ -53,11 +53,11 @@
                 <ComboBoxItem Content="?"/>
             </ComboBox>
             <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [020/100]"/>
-            <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewMouseMove="VolumeSlider_MouseMove"
+            <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewKeyDown="VolumeSlider_PreviewKeyDown" MouseMove="VolumeSlider_MouseMove"
                 Minimum="0" Maximum="1" Value=".2" LargeChange=".05" SmallChange=".01"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
             <Label Name="PositionLabel" Grid.Row="1" Grid.Column="4" Content="Position: [0000/0000]"/>
-            <Slider Name="PositionSlider" Grid.Row="1" Grid.Column="5" PreviewMouseMove="PositionSlider_MouseMove" PreviewMouseUp="PositionSlider_MouseUp"
+            <Slider Name="PositionSlider" Grid.Row="1" Grid.Column="5" PreviewKeyDown="PositionSlider_PreviewKeyDown" MouseMove="PositionSlider_MouseMove" PreviewMouseUp="PositionSlider_MouseUp"
                 Minimum="0" Maximum="0" Value="0" LargeChange="5" SmallChange="1"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
         </Grid>
