@@ -128,7 +128,7 @@ namespace MusicBox
                     img.Width = gridScale * (img.Width / img.Height);
                     img.MouseDown += (o, e) => 
                     {
-                        if (img.Tag == currentSongPath) Pause_Click(null, null);
+                        if (img.Tag.ToString() == currentSongPath) Pause_Click(null, null);
                         else PlaySongAsync(img.Tag.ToString());
                     };
                     ImageWrapPanel.Children.Add(img);
