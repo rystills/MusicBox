@@ -182,7 +182,9 @@ namespace MusicBox
         {
             StopCurrentSong();
             currentSongPath = path;
-            ActiveSongLabel.Content = $"Active Song: {Path.GetFileNameWithoutExtension(path)}";
+            string songName = Path.GetFileNameWithoutExtension(path);
+            songName = songName.Substring(0, songName.LastIndexOf(' '));
+            ActiveSongLabel.Content = $"Active Song: {songName}";
             const int SampleRate = 48000;
             const int Channels = 2;
 
