@@ -42,9 +42,8 @@ namespace MusicBox
         private void ReloadPlaylists(string desiredSelection = null)
         {
             // get playlist names
-            string[] buttonLabels = Directory.GetFiles(baseDirectory, "*.mbox")
-                                             .Select(file => Path.GetFileNameWithoutExtension(file))
-                                             .ToArray();
+            IEnumerable<string> buttonLabels = Directory.GetFiles(baseDirectory, "*.mbox")
+                                             .Select(file => Path.GetFileNameWithoutExtension(file));
             // add playlists to ListBox
             Playlists.Items.Clear();
             foreach (string label in buttonLabels)
@@ -89,13 +88,10 @@ namespace MusicBox
         {
             TextBox input = sender as TextBox;
             
-            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(input.Text))
+            if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(input.Text) && Playlists.SelectedItem != null)
             {
-                if (Playlists.SelectedItem != null)
-                {
-                    DownloadSong(input.Text);
-                    input.Text = string.Empty;
-                }
+                DownloadSong(input.Text);
+                input.Text = string.Empty;
             }
         }
 
