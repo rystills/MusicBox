@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using YoutubeDLSharp.Options;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace MusicBox
 {
@@ -37,6 +39,34 @@ namespace MusicBox
 
             InitializeComponent();
             ReloadPlaylists();
+            HookMediaKeys(this);
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+        private void HookMediaKeys(Window window)
+        {
+            IntPtr handle = new WindowInteropHelper(window).EnsureHandle();
+            HwndSource source = HwndSource.FromHwnd(handle);
+            source.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // WM_APPCOMMAND
+            if (msg == 0x0319)
+            {
+                int cmd = (int)((long)lParam >> 16 & 0xFFFF);
+
+                // toggle pause key
+                if (cmd == 14)
+                {
+                    Pause_Click(null, null);
+                    handled = true;
+                }
+            }
+            return IntPtr.Zero;
         }
 
         private void ReloadPlaylists(string desiredSelection = null)
