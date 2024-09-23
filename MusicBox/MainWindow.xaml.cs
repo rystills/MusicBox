@@ -359,7 +359,7 @@ namespace MusicBox
             => File.AppendAllText(Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox"),
                                   Path.GetFileNameWithoutExtension(songPath) + Environment.NewLine);
 
-        private async void DownloadSong(string url)
+        private async void DownloadSong(string url, bool playWhenReady = true)
         {
             // download song and add to current playlist
             var ytdl = new YoutubeDL { YoutubeDLPath = ytdlPath, FFmpegPath = ffmpegPath };
@@ -370,6 +370,7 @@ namespace MusicBox
             {
                 AddSongToPlaylist(res.Data);
                 ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
+                if (playWhenReady) PlaySongAsync(res.Data);
             }
         }
 
