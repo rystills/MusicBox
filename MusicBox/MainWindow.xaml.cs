@@ -116,11 +116,41 @@ namespace MusicBox
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // spacebar pauses the song unless we're typing into a TextBox
-            if (e.Key == Key.Space && !(Keyboard.FocusedElement is TextBox))
+            // TextBoxes get input priority
+            if (Keyboard.FocusedElement is TextBox) return;
+
+            // spacebar pauses the song
+            if (e.Key == Key.Space)
             {
                 Pause_Click(null, null);
                 e.Handled = true;
+            }
+
+            // delete confirms and removes the selected item
+            else if (e.Key == Key.Delete)
+            {
+                // check if playlist is selected
+                if (Keyboard.FocusedElement is ListBoxItem item
+                    && MessageBox.Show($"Are you sure you wish to delete playlist '{item.Content}'?", "Delete Playlist Confirmation",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    for (int k = 0; k < ImageWrapPanel.Children.Count; ++k)
+                        if ((ImageWrapPanel.Children[k] is Image curImg) && curImg.Tag.ToString() == currentSongPath)
+                        {
+                            // stop the current song and clear the player controls
+                            StopCurrentSong();
+                            currentSongPath = "";
+                            ActiveSongLabel.Content = "Active Song:";
+                            PositionLabel.Content = "Position: [0000/0000]";
+                            PositionSlider.Value = 0;
+                            break;
+                        }
+
+                    // delete the playlist and clear the thumbnail grid
+                    File.Delete(item.Content.ToString() + ".mbox");
+                    ReloadPlaylists();
+                    ImageWrapPanel.Children.Clear();
+                }
             }
         }
 
