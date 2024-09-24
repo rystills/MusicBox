@@ -157,7 +157,7 @@ namespace MusicBox
                 string path = paths.ElementAt(i);
                 
                 // cut out optional song data if present
-                if (path[path.Length - 13] != '[')
+                if (path[^13] != '[')
                     path = path.Substring(0, path.LastIndexOf('[') + 12) + ']';
                 string fullImagePath = Path.Combine(baseDirectory, path + ".png");
                 
@@ -174,7 +174,7 @@ namespace MusicBox
                     img.MouseDown += (o, e) => 
                     {
                         if (img.Tag.ToString() == currentSongPath) Pause_Click(null, null);
-                        else PlaySongAsync(img.Tag.ToString());
+                        else _ = PlaySongAsync(img.Tag.ToString());
                     };
                     ImageWrapPanel.Children.Add(img);
                 }
@@ -221,7 +221,7 @@ namespace MusicBox
 
                 // cut gain value from search string
                 string searchString = newLine;
-                if (searchString[searchString.Length - 13] != '[')
+                if (searchString[^13] != '[')
                     searchString = searchString.Substring(0, searchString.LastIndexOf('[') + 12);
                 
                 string[] lines = File.ReadAllLines(path);
@@ -229,7 +229,7 @@ namespace MusicBox
                     if (lines[i].Contains(searchString))
                     {
                         // remove old gain value if present
-                        if (newLine[newLine.Length - 13] != '[')
+                        if (newLine[^13] != '[')
                             newLine = newLine.Substring(0, newLine.LastIndexOf('[') + 12) + ']';
 
                         // apply new gain value
@@ -302,13 +302,13 @@ namespace MusicBox
                 // right/up increments by LargeChange
                 case Key.Right:
                 case Key.Up:
-                    PlaySongAsync(currentSongPath, (float)PositionSlider.Value + PositionSlider.LargeChange);
+                    _ = PlaySongAsync(currentSongPath, (float)PositionSlider.Value + PositionSlider.LargeChange);
                     goto Handler;
 
                 // left/down decrements by LargeChange
                 case Key.Left:
                 case Key.Down:
-                    PlaySongAsync(currentSongPath, (float)PositionSlider.Value - PositionSlider.LargeChange);
+                    _ = PlaySongAsync(currentSongPath, (float)PositionSlider.Value - PositionSlider.LargeChange);
 
                 Handler:
                     e.Handled = true;
@@ -320,7 +320,7 @@ namespace MusicBox
             => PositionLabel.Content = $"Position: [{((int)PositionSlider.Value).ToString("D4")}/{((int)PositionSlider.Maximum).ToString("D4")}]";
 
         private void PositionSlider_MouseUp(object sender, MouseButtonEventArgs e)
-            => PlaySongAsync(currentSongPath, PositionSlider.Value);
+            => _ = PlaySongAsync(currentSongPath, PositionSlider.Value);
 
         private void PasteCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -342,7 +342,7 @@ namespace MusicBox
             string songName = Path.GetFileNameWithoutExtension(path);
 
             // apply optional song data if present
-            if (songName[songName.Length - 13] == '[')
+            if (songName[^13] == '[')
                 SetSongGain(.5);
             else
             {
@@ -438,7 +438,7 @@ namespace MusicBox
 
                 // play looped
                 case "∞":
-                    PlaySongAsync(currentSongPath);
+                    _ = PlaySongAsync(currentSongPath);
                     break;
 
                 // play random
@@ -467,7 +467,7 @@ namespace MusicBox
         private void PlayRandomSong()
         {
             int songInd = random.Next(ImageWrapPanel.Children.Count);
-            PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
+            _ = PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
         }
 
         private void StopCurrentSong()
@@ -490,7 +490,7 @@ namespace MusicBox
             {
                 AddSongToPlaylist(res.Data);
                 ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
-                if (playWhenReady) PlaySongAsync(res.Data);
+                if (playWhenReady) _ = PlaySongAsync(res.Data);
             }
         }
 
