@@ -154,14 +154,19 @@ namespace MusicBox
             // add clickable thumbnail images
             for (int i = 0; i < paths.Count(); ++i)
             {
-                string fullImagePath = Path.Combine(baseDirectory, paths.ElementAt(i) + ".png");
+                string path = paths.ElementAt(i);
+                
+                // cut out optional song data if present
+                if (path[path.Length - 13] != '[')
+                    path = path.Substring(0, path.LastIndexOf('[') + 12) + ']';
+                string fullImagePath = Path.Combine(baseDirectory, path + ".png");
                 
                 if (!File.Exists(fullImagePath)) MessageBox.Show($"Image not found: {fullImagePath}");
                 else 
                 {
                     Image img = new Image();
                     img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".opus");
-                    if (!File.Exists(img.Tag.ToString()))
+                    if (!File.Exists(Path.Combine(baseDirectory, path + ".opus")))
                         img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".m4a");
                     img.Source = new BitmapImage(new Uri(fullImagePath));
                     img.Height = gridScale;
@@ -200,6 +205,65 @@ namespace MusicBox
 
         private void VolumeSlider_MouseMove(object sender, MouseEventArgs e)
             => VolumeLabel.Content = $"Volume: [{((int)(VolumeSlider.Value*100)).ToString("D3")}/100]";
+
+        private void SongGainSlider_MouseMove(object sender, MouseEventArgs e)
+        {
+            string prevLabel = SongGainLabel.Content.ToString();
+            SongGainLabel.Content = $"Song Gain: [{(SongGainSlider.Value <= .495f ? "  " : "+")}{((int)(SongGainSlider.Value * 200 - 100)).ToString("D3")}/100]";
+
+            // write new song gain to playlist file
+            if (prevLabel != SongGainLabel.Content.ToString()
+                && !string.IsNullOrEmpty(currentSongPath)
+                && (SongGainSlider.Value != .5 || currentSongPath[currentSongPath.LastIndexOf('[') + 12] != ']'))
+            {
+                string path = Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox");
+                string newLine = Path.Combine(Path.GetDirectoryName(currentSongPath), Path.GetFileNameWithoutExtension(currentSongPath));
+
+                // cut gain value from search string
+                string searchString = newLine;
+                if (searchString[searchString.Length - 13] != '[')
+                    searchString = searchString.Substring(0, searchString.LastIndexOf('[') + 12);
+                
+                string[] lines = File.ReadAllLines(path);
+                for (int i = 0; i < lines.Length; i++)
+                    if (lines[i].Contains(searchString))
+                    {
+                        // remove old gain value if present
+                        if (newLine[newLine.Length - 13] != '[')
+                            newLine = newLine.Substring(0, newLine.LastIndexOf('[') + 12) + ']';
+
+                        // apply new gain value
+                        newLine = newLine.Substring(0, newLine.Length - 1) + " " + (SongGainSlider.Value == 1 ? "1" : SongGainSlider.Value == 0 ? "0" : SongGainSlider.Value.ToString("F4").Substring(1)) + ']';
+
+                        // write back to file
+                        lines[i] = newLine;
+                        File.WriteAllLines(path, lines);
+                        break;
+                    }
+            }
+        }
+
+        private void SongGainSlider_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                // right/up increments by LargeChange
+                case Key.Right:
+                case Key.Up:
+                    SongGainSlider.Value = Math.Min(SongGainSlider.Maximum, SongGainSlider.Value + SongGainSlider.LargeChange);
+                    goto Handler;
+
+                // left/down decrements by LargeChange
+                case Key.Left:
+                case Key.Down:
+                    SongGainSlider.Value = Math.Max(SongGainSlider.Minimum, SongGainSlider.Value - SongGainSlider.LargeChange);
+
+                Handler:
+                    SongGainSlider_MouseMove(null, null);
+                    e.Handled = true;
+                    break;
+            }
+        }
 
         private void VolumeSlider_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -256,13 +320,31 @@ namespace MusicBox
                 DownloadSong(Clipboard.GetText());
         }
 
+        private void SetSongGain(double val)
+        {
+            SongGainSlider.Value = val;
+            SongGainSlider_MouseMove(null, null);
+        }
+
         private async Task PlaySongAsync(string path, double startTime = 0)
         {
             if (string.IsNullOrWhiteSpace(path)) return;
             StopCurrentSong();
             currentSongPath = path;
             string songName = Path.GetFileNameWithoutExtension(path);
-            songName = songName.Substring(0, songName.LastIndexOf(' '));
+
+            // apply optional song data if present
+            if (songName[songName.Length - 13] == '[')
+                SetSongGain(.5);
+            else
+            {
+                SetSongGain(double.Parse(songName.Substring(0, songName.Length - 1).Split(' ').Last()));
+                path = Path.Combine(Path.GetDirectoryName(path), songName.Substring(0, songName.LastIndexOf('[') + 12) + ']' + Path.GetExtension(path));
+            }
+
+            // subtract 13 characters to remove optional song data without potentially exceeding [video_id]
+            songName = songName.Substring(0, songName.LastIndexOf(' ', songName.Length - 13));
+
             ActiveSongLabel.Content = $"Active Song: {songName}";
             const int SampleRate = 48000;
             const int Channels = 2;
@@ -308,7 +390,7 @@ namespace MusicBox
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)VolumeSlider.Value; });
+                        Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)(VolumeSlider.Value * SongGainSlider.Value); });
                         await Task.Delay(50);
                     }
                 });
