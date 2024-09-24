@@ -59,7 +59,7 @@
                 <ComboBoxItem Content="∞"/>
                 <ComboBoxItem Content="?"/>
             </ComboBox>
-            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [020/100]"/>
+            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [030/100]"/>
             <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewKeyDown="VolumeSlider_PreviewKeyDown" MouseMove="VolumeSlider_MouseMove"
                 Minimum="0" Maximum="1" Value=".3" LargeChange=".05" SmallChange=".01"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>

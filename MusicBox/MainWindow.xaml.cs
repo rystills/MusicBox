@@ -217,7 +217,7 @@ namespace MusicBox
                 && (SongGainSlider.Value != .5 || currentSongPath[currentSongPath.LastIndexOf('[') + 12] != ']'))
             {
                 string path = Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox");
-                string newLine = Path.Combine(Path.GetDirectoryName(currentSongPath), Path.GetFileNameWithoutExtension(currentSongPath));
+                string newLine = Path.GetFileNameWithoutExtension(currentSongPath);
 
                 // cut gain value from search string
                 string searchString = newLine;
@@ -238,6 +238,14 @@ namespace MusicBox
                         // write back to file
                         lines[i] = newLine;
                         File.WriteAllLines(path, lines);
+                        
+                        // update playlist image tag & currentSongPath
+                        for (int k = 0; k < ImageWrapPanel.Children.Count; ++k)
+                            if ((ImageWrapPanel.Children[k] is Image curImg) && curImg.Tag.ToString() == currentSongPath) {
+                                curImg.Tag = Path.Combine(baseDirectory, newLine) + Path.GetExtension(currentSongPath);
+                                currentSongPath = curImg.Tag.ToString();
+                                break;
+                            }
                         break;
                     }
             }
