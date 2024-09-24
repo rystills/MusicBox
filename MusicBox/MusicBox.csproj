@@ -16,7 +16,12 @@
     <PackageReference Include="NAudio.WinForms" Version="2.2.1" />
     <PackageReference Include="NAudio.WinMM" Version="2.2.1" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Security.AccessControl" Version="6.0.0" />
-    <PackageReference Include="YoutubeDLSharp" Version="1.1.0" />
+    <PackageReference Include="System.Security.AccessControl" Version="6.0.1" />
+    <PackageReference Include="YoutubeDLSharp" Version="1.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
   </ItemGroup>
 </Project>
