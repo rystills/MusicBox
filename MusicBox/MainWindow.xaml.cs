@@ -114,6 +114,13 @@ namespace MusicBox
             }
         }
 
+        private Image GetActiveThumbnail()
+        {
+            for (int i = 0; i < ImageWrapPanel.Children.Count; ++i)
+                if ((ImageWrapPanel.Children[i] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return curImg;
+            return null;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // TextBoxes get input priority
@@ -134,22 +141,29 @@ namespace MusicBox
                     && MessageBox.Show($"Are you sure you wish to delete playlist '{item.Content}'?", "Delete Playlist Confirmation",
                     MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    for (int k = 0; k < ImageWrapPanel.Children.Count; ++k)
-                        if ((ImageWrapPanel.Children[k] is Image curImg) && curImg.Tag.ToString() == currentSongPath)
-                        {
-                            // stop the current song and clear the player controls
-                            StopCurrentSong();
-                            currentSongPath = "";
-                            ActiveSongLabel.Content = "Active Song:";
-                            PositionLabel.Content = "Position: [0000/0000]";
-                            PositionSlider.Value = 0;
-                            break;
-                        }
+                    if (GetActiveThumbnail() is Image img)
+                        StopCurrentSong(true);
 
                     // delete the playlist and clear the thumbnail grid
                     File.Delete(item.Content.ToString() + ".mbox");
                     ReloadPlaylists();
                     ImageWrapPanel.Children.Clear();
+                }
+
+                // check if song thumbnail is selected
+                else if (Keyboard.FocusedElement is ScrollViewer && GetActiveThumbnail() is Image img
+                    && MessageBox.Show($"Are you sure you wish to remove song '{img.Tag}'?", "Delete Song Confirmation",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    StopCurrentSong(true);
+                    
+                    // remove song from current playlist
+                    string path = Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox");
+                    string[] lines = File.ReadAllLines(path);
+                    string searchString = Path.GetFileNameWithoutExtension(img.Tag.ToString());
+                    lines = lines.Where(line => line != searchString).ToArray();
+                    File.WriteAllLines(path, lines);
+                    Playlists_SelectionChanged(null, null);
                 }
             }
         }
@@ -255,7 +269,7 @@ namespace MusicBox
                     searchString = searchString.Substring(0, searchString.LastIndexOf('[') + 12);
                 
                 string[] lines = File.ReadAllLines(path);
-                for (int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < lines.Length; ++i)
                     if (lines[i].Contains(searchString))
                     {
                         // remove old gain value if present
@@ -268,14 +282,13 @@ namespace MusicBox
                         // write back to file
                         lines[i] = newLine;
                         File.WriteAllLines(path, lines);
-                        
+
                         // update playlist image tag & currentSongPath
-                        for (int k = 0; k < ImageWrapPanel.Children.Count; ++k)
-                            if ((ImageWrapPanel.Children[k] is Image curImg) && curImg.Tag.ToString() == currentSongPath) {
-                                curImg.Tag = Path.Combine(baseDirectory, newLine) + Path.GetExtension(currentSongPath);
-                                currentSongPath = curImg.Tag.ToString();
-                                break;
-                            }
+                        if (GetActiveThumbnail() is Image curImg)
+                        {
+                            curImg.Tag = Path.Combine(baseDirectory, newLine) + Path.GetExtension(currentSongPath);
+                            currentSongPath = curImg.Tag.ToString();
+                        }
                         break;
                     }
             }
@@ -410,7 +423,7 @@ namespace MusicBox
             {
                 while (!token.IsCancellationRequested)
                 {
-                    Dispatcher.InvokeAsync(() => { UpdatePositionSlider(); });
+                    _ = Dispatcher.InvokeAsync(() => { UpdatePositionSlider(); });
                     await Task.Delay(50);
                 }
             });
@@ -428,7 +441,7 @@ namespace MusicBox
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)(VolumeSlider.Value * SongGainSlider.Value); });
+                        _ = Dispatcher.InvokeAsync(() => { waveOut.Volume = (float)(VolumeSlider.Value * SongGainSlider.Value); });
                         await Task.Delay(50);
                     }
                 });
@@ -500,9 +513,19 @@ namespace MusicBox
             _ = PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
         }
 
-        private void StopCurrentSong()
+        private void StopCurrentSong(bool clearPlayer = false)
         {
+            // stop the current song
             cancellationTokenSource?.Cancel();
+            
+            if (clearPlayer)
+            {
+                // clear the player controls
+                currentSongPath = "";
+                ActiveSongLabel.Content = "Active Song:";
+                PositionLabel.Content = "Position: [0000/0000]";
+                PositionSlider.Value = 0;
+            }
         }
 
         private void AddSongToPlaylist(string songPath)
