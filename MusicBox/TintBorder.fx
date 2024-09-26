@@ -10,8 +10,7 @@ float4 main(float2 uv : TEXCOORD0) : SV_TARGET
 
     // determine if the current pixel is within the border
     float2 borderDist = min(uv, 1.0 - uv);
-    float2 adjustedBorderThickness = float2(BorderThickness / AspectRatio, BorderThickness);
-    float isBorder = step(borderDist.x, adjustedBorderThickness.x) + step(borderDist.y, adjustedBorderThickness.y);
+    float isBorder = step(borderDist.x, BorderThickness / AspectRatio) + step(borderDist.y, BorderThickness);
 
-    return lerp(color, TintColor, saturate(isBorder));
+    return lerp(color, TintColor, isBorder);
 }

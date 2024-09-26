@@ -28,7 +28,7 @@ namespace MusicBox
         private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
         private string ffprobePath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffprobe.exe";
         private CancellationTokenSource cancellationTokenSource;
-        private Random random = new Random();
+        private Random random = new();
         private float gridScale = 100;
         private string currentSongPath;
         private DateTime playbackStartTime;
@@ -216,7 +216,7 @@ namespace MusicBox
                 if (!File.Exists(fullImagePath)) MessageBox.Show($"Image not found: {fullImagePath}");
                 else 
                 {
-                    Image img = new Image();
+                    Image img = new();
                     img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".opus");
                     if (!File.Exists(Path.Combine(baseDirectory, path + ".opus")))
                         img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".m4a");
@@ -240,7 +240,7 @@ namespace MusicBox
         private double GetSongDuration(string path)
         {
             // run ffprobe
-            Process ffprobeProcess = new Process { StartInfo = new ProcessStartInfo
+            Process ffprobeProcess = new() { StartInfo = new ProcessStartInfo
             {
                 FileName = ffprobePath,
                 Arguments = $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\"",
@@ -435,11 +435,11 @@ namespace MusicBox
             PositionSlider.Value = startTime;
 
             // init cancellation token
-            cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource = new();
             CancellationToken token = cancellationTokenSource.Token;
 
             // start quiet ffmpeg process to decode audio file
-            Process ffmpegProcess = new Process { StartInfo = new ProcessStartInfo
+            Process ffmpegProcess = new() { StartInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
                 Arguments = $"-ss {startTime} -i \"{path}\" -f s16le -ar {SampleRate} -ac {Channels} pipe:1",
@@ -460,9 +460,9 @@ namespace MusicBox
             });
 
             // pipe PCM data from ffmpeg to naudio
-            using (WaveOutEvent waveOut = new WaveOutEvent())
+            using (WaveOutEvent waveOut = new())
             {
-                BufferedWaveProvider waveProvider = new BufferedWaveProvider(new WaveFormat(SampleRate, Channels)) { BufferDuration = TimeSpan.FromSeconds(5) };
+                BufferedWaveProvider waveProvider = new(new WaveFormat(SampleRate, Channels)) { BufferDuration = TimeSpan.FromSeconds(5) };
                 waveOut.Init(waveProvider);
                 waveOut.Play();
                 playbackStartTime = DateTime.Now.AddSeconds(-startTime);
@@ -577,8 +577,8 @@ namespace MusicBox
         private async void DownloadSong(string url, bool playWhenReady = true)
         {
             // download song and add to current playlist
-            var ytdl = new YoutubeDL { YoutubeDLPath = ytdlPath, FFmpegPath = ffmpegPath };
-            var res = await ytdl.RunAudioDownload(url, overrideOptions: new OptionSet() { WriteThumbnail = true, ConvertThumbnails = "png" });
+            YoutubeDL ytdl = new() { YoutubeDLPath = ytdlPath, FFmpegPath = ffmpegPath };
+            RunResult<string> res = await ytdl.RunAudioDownload(url, overrideOptions: new OptionSet() { WriteThumbnail = true, ConvertThumbnails = "png" });
             if (string.IsNullOrWhiteSpace(res.Data))
                 MessageBox.Show($"Error: failed to download '{url}'");
             else
