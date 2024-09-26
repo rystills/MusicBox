@@ -54,9 +54,10 @@
             </Grid.ColumnDefinitions>
             <Label Name="ActiveSongLabel" Grid.ColumnSpan="7" Content="Active Song:"/>
             <Button Grid.Row="1" Content="Pause" Click="Pause_Click"/>
-            <ComboBox Name="EndBehavior" Grid.Row="1" Grid.Column="1" SelectedIndex="2">
+            <ComboBox Name="EndBehavior" Grid.Row="1" Grid.Column="1" SelectedIndex="3">
                 <ComboBoxItem Content="1"/>
                 <ComboBoxItem Content="∞"/>
+                <ComboBoxItem Content="»"/>
                 <ComboBoxItem Content="?"/>
             </ComboBox>
             <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [030/100]"/>

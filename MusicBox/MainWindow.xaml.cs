@@ -121,6 +121,13 @@ namespace MusicBox
             return null;
         }
 
+        private int GetActiveInd()
+        {
+            for (int i = 0; i < ImageWrapPanel.Children.Count; ++i)
+                if ((ImageWrapPanel.Children[i] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return i;
+            return -1;
+        }
+
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // TextBoxes get input priority
@@ -488,6 +495,11 @@ namespace MusicBox
                 case "?":
                     PlayRandomSong();
                     break;
+
+                // play next
+                case "»":
+                    PlayNextSong();
+                    break;
             }
         }
 
@@ -505,6 +517,12 @@ namespace MusicBox
             }
 
             PositionSlider_MouseMove(null, null);
+        }
+
+        private void PlayNextSong()
+        {
+            int songInd = (GetActiveInd() + 1) % ImageWrapPanel.Children.Count;
+            _ = PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
         }
 
         private void PlayRandomSong()
