@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace MusicBox
 {
@@ -228,6 +229,10 @@ namespace MusicBox
                         else _ = PlaySongAsync(img.Tag.ToString());
                     };
                     ImageWrapPanel.Children.Add(img);
+
+                    // reapply selection border
+                    if (img.Tag.ToString() == currentSongPath)
+                        ApplySelectedThumbnailBorder(false, img);
                 }
             }
         }
@@ -384,11 +389,30 @@ namespace MusicBox
             SongGainSlider_MouseMove(null, null);
         }
 
+        private void ApplySelectedThumbnailBorder(bool removeExisting = true, Image img = null)
+        {
+            // remove any existing borders
+            if (removeExisting)
+                foreach (Image image in ImageWrapPanel.Children)
+                    image.Effect = null;
+
+            // apply TintBorderEffect to selected thumbnail
+            if ((img ??= GetActiveThumbnail()) != null)
+                img.Effect = new TintBorderEffect
+                {
+                    Input = new ImageBrush(img.Source),
+                    TintColor = Color.FromRgb(0, 0, 255),
+                    BorderThickness = .04,
+                    AspectRatio = img.Source.Width / img.Source.Height
+                };
+        }
+
         private async Task PlaySongAsync(string path, double startTime = 0)
         {
             if (string.IsNullOrWhiteSpace(path)) return;
             StopCurrentSong();
             currentSongPath = path;
+            ApplySelectedThumbnailBorder();
             string songName = Path.GetFileNameWithoutExtension(path);
 
             // apply optional song data if present
