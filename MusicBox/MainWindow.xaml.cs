@@ -139,10 +139,15 @@ namespace MusicBox
             {
                 // resize thumbnail grid
                 gridScale = Math.Max(1, gridScale + e.Delta * .1f);
-                foreach (Image img in ImageWrapPanel.Children)
+                foreach (Grid grid in ImageWrapPanel.Children)
                 {
-                    img.Height = gridScale;
-                    img.Width = gridScale * (img.Width / img.Height);
+                    Image img = (Image)grid.Children[0];
+                    TextBlock textBlock = (TextBlock)grid.Children[1];
+
+                    grid.Height = gridScale;
+
+                    // constrain textBlock to grid
+                    textBlock.MaxWidth = gridScale * (img.ActualWidth / img.ActualHeight);
                 }
             }
         }
@@ -150,14 +155,14 @@ namespace MusicBox
         private Image GetActiveThumbnail()
         {
             for (int i = 0; i < ImageWrapPanel.Children.Count; ++i)
-                if ((ImageWrapPanel.Children[i] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return curImg;
+                if ((((Grid)(ImageWrapPanel.Children[i])).Children[0] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return curImg;
             return null;
         }
 
         private int GetActiveInd()
         {
             for (int i = 0; i < ImageWrapPanel.Children.Count; ++i)
-                if ((ImageWrapPanel.Children[i] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return i;
+                if ((((Grid)(ImageWrapPanel.Children[i])).Children[0] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return i;
             return -1;
         }
 
@@ -248,19 +253,43 @@ namespace MusicBox
                 if (!File.Exists(fullImagePath)) MessageBox.Show($"Image not found: {fullImagePath}");
                 else 
                 {
+                    // place image and label in a new Grid
+                    Grid grid = new();
+                    ImageWrapPanel.Children.Add(grid);
                     Image img = new();
+
+                    // set tag to match file extension
                     img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".opus");
                     if (!File.Exists(Path.Combine(baseDirectory, path + ".opus")))
                         img.Tag = Path.Combine(baseDirectory, paths.ElementAt(i) + ".m4a");
+
                     img.Source = new BitmapImage(new Uri(fullImagePath));
-                    img.Height = gridScale;
-                    img.Width = gridScale * (img.Width / img.Height);
+                    grid.Height = gridScale;
+
+                    // play or toggle pause on click
                     img.MouseDown += (o, e) => 
                     {
                         if (img.Tag.ToString() == currentSongPath) Pause_Click(null, null);
                         else _ = PlaySongAsync(img.Tag.ToString());
                     };
-                    ImageWrapPanel.Children.Add(img);
+                    
+                    // constrain textBlock to grid
+                    img.Loaded += (o, e) => ((TextBlock)grid.Children[1]).MaxWidth = img.ActualWidth;
+                    
+                    grid.Children.Add(img);
+
+                    TextBlock textBlock = new()
+                    { 
+                        Text = path[..path.LastIndexOf(' ')],
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        Foreground = new SolidColorBrush(Colors.White),
+                        Background = new SolidColorBrush(Color.FromArgb(122, 0, 0, 0)),
+                        IsHitTestVisible = false,
+                    };
+                    
+                    grid.Children.Add(textBlock);
 
                     // reapply selection border
                     if (img.Tag.ToString() == currentSongPath)
@@ -425,8 +454,8 @@ namespace MusicBox
         {
             // remove any existing borders
             if (removeExisting)
-                foreach (Image image in ImageWrapPanel.Children)
-                    image.Effect = null;
+                foreach (Grid grid in ImageWrapPanel.Children)
+                    grid.Children[0].Effect = null;
 
             // apply TintBorderEffect to selected thumbnail
             if ((img ??= GetActiveThumbnail()) != null)
@@ -578,13 +607,13 @@ namespace MusicBox
         private void PlayNextSong()
         {
             int songInd = (GetActiveInd() + 1) % ImageWrapPanel.Children.Count;
-            _ = PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
+            _ = PlaySongAsync(((Image)((Grid)ImageWrapPanel.Children[songInd]).Children[0]).Tag.ToString());
         }
 
         private void PlayRandomSong()
         {
             int songInd = random.Next(ImageWrapPanel.Children.Count);
-            _ = PlaySongAsync(((Image)ImageWrapPanel.Children[songInd]).Tag.ToString());
+            _ = PlaySongAsync(((Image)((Grid)ImageWrapPanel.Children[songInd]).Children[0]).Tag.ToString());
         }
 
         private void StopCurrentSong(bool clearPlayer = false)
