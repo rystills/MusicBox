@@ -15,6 +15,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Microsoft.Win32;
 
 namespace MusicBox
 {
@@ -24,9 +25,9 @@ namespace MusicBox
     public partial class MainWindow : Window
     {
         private string baseDirectory;
-        private string ytdlPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\yt-dlp.exe";
-        private string ffmpegPath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffmpeg.exe";
-        private string ffprobePath = "C:\\Users\\Ryan\\Desktop\\ffmpeg\\bin\\ffprobe.exe";
+        private string ytdlPath;
+        private string ffmpegPath;
+        private string ffprobePath;
         private CancellationTokenSource cancellationTokenSource;
         private Random random = new();
         private float gridScale = 100;
@@ -41,6 +42,37 @@ namespace MusicBox
             InitializeComponent();
             ReloadPlaylists();
             HookMediaKeys(this);
+
+            // get dependency paths from config file, if present
+            if (File.Exists(".config"))
+            {
+                string[] lines = File.ReadAllLines(".config");
+                (ytdlPath, ffmpegPath, ffprobePath) = (lines[0], lines[1], lines[2]);
+            }
+            else
+            {
+                // search system path for dependencies
+                foreach (string path in Environment.GetEnvironmentVariable("Path").Split(';'))
+                {
+                    if (Path.Combine(path, "yt-dlp.exe") is string newYtdlPath && File.Exists(newYtdlPath))
+                        ytdlPath = newYtdlPath;
+                    if (Path.Combine(path, "ffmpeg.exe") is string newFfmpegPath && File.Exists(newFfmpegPath))
+                        ffmpegPath = newFfmpegPath;
+                    if (Path.Combine(path, "ffprobe.exe") is string newFfprobePath && File.Exists(newFfprobePath))
+                        ffprobePath = newFfprobePath;
+                }
+
+                // manually locate dependencies if not found
+                if (ytdlPath == null && new OpenFileDialog() { Title = "Unable to locate yt-dlp in system path. Please select yt-dlp.exe" } is var ytdlDialog && ytdlDialog.ShowDialog() == true)
+                    ytdlPath = ytdlDialog.FileName;
+                if (ffmpegPath == null && new OpenFileDialog() { Title = "Unable to locate ffmpeg in system path. Please select ffmpeg.exe" } is var ffmpegDialog && ffmpegDialog.ShowDialog() == true)
+                    ffmpegPath = ffmpegDialog.FileName;
+                if (ffprobePath == null && new OpenFileDialog() { Title = "Unable to locate ffprobe in system path. Please select ffprobe.exe" } is var ffprobeDialog && ffprobeDialog.ShowDialog() == true)
+                    ffprobePath = ffprobeDialog.FileName;
+            
+                // write dependency paths to config file
+                File.WriteAllLines(".config", [ytdlPath, ffmpegPath, ffprobePath]);
+            }
         }
 
         [DllImport("user32.dll")]
