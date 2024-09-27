@@ -402,7 +402,7 @@ namespace MusicBox
                 {
                     Input = new ImageBrush(img.Source),
                     TintColor = Color.FromRgb(0, 0, 255),
-                    BorderThickness = .04,
+                    BorderThickness = .02,
                     AspectRatio = img.Source.Width / img.Source.Height
                 };
         }

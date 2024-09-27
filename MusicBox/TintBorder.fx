@@ -7,10 +7,6 @@ float AspectRatio : register(c2);
 float4 main(float2 uv : TEXCOORD0) : SV_TARGET
 {
     float4 color = tex2D(implicitInputSampler, uv);
-
-    // determine if the current pixel is within the border
     float2 borderDist = min(uv, 1.0 - uv);
-    float isBorder = step(borderDist.x, BorderThickness / AspectRatio) + step(borderDist.y, BorderThickness);
-
-    return lerp(color, TintColor, isBorder);
+    return lerp(color, TintColor, pow(.5 * max((BorderThickness / AspectRatio) / borderDist.x, BorderThickness / borderDist.y), 1.5));
 }
