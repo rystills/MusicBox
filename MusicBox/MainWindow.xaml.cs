@@ -287,6 +287,7 @@ namespace MusicBox
                     };
                     
                     grid.Children.Add(textBlock);
+                    img.ToolTip = new ToolTip() { Content = textBlock.Text };
 
                     // reapply selection border
                     if (img.Tag.ToString() == currentSongPath)
@@ -623,8 +624,13 @@ namespace MusicBox
                 // clear the player controls
                 currentSongPath = "";
                 ActiveSongLabel.Content = "Active Song:";
-                PositionLabel.Content = "Position: [0000/0000]";
+
                 PositionSlider.Value = 0;
+                PositionSlider.Maximum = 0;
+                PositionSlider_MouseMove(null, null);
+
+                SongGainSlider.Value = 0.5;
+                SongGainSlider_MouseMove(null, null);
             }
         }
 
