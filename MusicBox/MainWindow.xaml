@@ -64,15 +64,15 @@
                 <ComboBoxItem Content="»"/>
                 <ComboBoxItem Content="?"/>
             </ComboBox>
-            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [030/100]"/>
+            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [030/100]" Margin="0, 0, -8, 0"/>
             <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewKeyDown="VolumeSlider_PreviewKeyDown" MouseMove="VolumeSlider_MouseMove"
                 Minimum="0" Maximum="1" Value=".3" LargeChange=".05" SmallChange=".01"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
-            <Label Name="SongGainLabel" Grid.Row="1" Grid.Column="4" Content="Song Gain: [+000/100]"/>
+            <Label Name="SongGainLabel" Grid.Row="1" Grid.Column="4" Content="Song Gain: [+000/100]" Margin="5, 0, -8, 0"/>
             <Slider Name="SongGainSlider" Grid.Row="1" Grid.Column="5" PreviewKeyDown="SongGainSlider_PreviewKeyDown" MouseMove="SongGainSlider_MouseMove"
                 Minimum="0" Maximum="1" Value=".5" LargeChange=".05" SmallChange=".01"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
-            <Label Name="PositionLabel" Grid.Row="1" Grid.Column="6" Content="Position: [0000/0000]"/>
+            <Label Name="PositionLabel" Grid.Row="1" Grid.Column="6" Content="Position: [0000/0000]" Margin="5, 0, -8, 0"/>
             <Slider Name="PositionSlider" Grid.Row="1" Grid.Column="7" PreviewKeyDown="PositionSlider_PreviewKeyDown" MouseMove="PositionSlider_MouseMove" PreviewMouseUp="PositionSlider_MouseUp"
                 Minimum="0" Maximum="0" Value="0" LargeChange="5" SmallChange="1"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
