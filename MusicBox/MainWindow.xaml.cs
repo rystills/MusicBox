@@ -141,13 +141,11 @@ namespace MusicBox
                 gridScale = Math.Max(1, gridScale + e.Delta * .1f);
                 foreach (Grid grid in ImageWrapPanel.Children)
                 {
-                    Image img = (Image)grid.Children[0];
-                    TextBlock textBlock = (TextBlock)grid.Children[1];
-
                     grid.Height = gridScale;
 
                     // constrain textBlock to grid
-                    textBlock.MaxWidth = gridScale * (img.ActualWidth / img.ActualHeight);
+                    Image img = (Image)grid.Children[0];
+                    ((TextBlock)grid.Children[1]).MaxWidth = gridScale * (img.ActualWidth / img.ActualHeight);
                 }
             }
         }
@@ -162,7 +160,7 @@ namespace MusicBox
         private int GetActiveInd()
         {
             for (int i = 0; i < ImageWrapPanel.Children.Count; ++i)
-                if ((((Grid)(ImageWrapPanel.Children[i])).Children[0] is Image curImg) && curImg.Tag.ToString() == currentSongPath) return i;
+                if (((Image)((Grid)(ImageWrapPanel.Children[i])).Children[0]).Tag.ToString() == currentSongPath) return i;
             return -1;
         }
 
@@ -204,9 +202,8 @@ namespace MusicBox
                     
                     // remove song from current playlist
                     string path = Path.Combine(baseDirectory, (Playlists.SelectedItem as ContentControl).Content + ".mbox");
-                    string[] lines = File.ReadAllLines(path);
                     string searchString = Path.GetFileNameWithoutExtension(img.Tag.ToString());
-                    lines = lines.Where(line => line != searchString).ToArray();
+                    IEnumerable<string> lines = File.ReadAllLines(path).Where(line => line != searchString);
                     File.WriteAllLines(path, lines);
                     Playlists_SelectionChanged(null, null);
                 }
