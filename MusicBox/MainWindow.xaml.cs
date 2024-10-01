@@ -147,6 +147,8 @@ namespace MusicBox
                     Image img = (Image)grid.Children[0];
                     ((TextBlock)grid.Children[1]).MaxWidth = gridScale * (img.ActualWidth / img.ActualHeight);
                 }
+
+                e.Handled = true;
             }
         }
 
