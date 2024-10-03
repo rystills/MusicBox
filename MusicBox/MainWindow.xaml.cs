@@ -24,7 +24,7 @@ namespace MusicBox
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string baseDirectory;
+        private string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private string ytdlPath;
         private string ffmpegPath;
         private string ffprobePath;
@@ -36,9 +36,6 @@ namespace MusicBox
 
         public MainWindow()
         {
-            // Get the path of the bin folder
-            baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
             InitializeComponent();
             ReloadPlaylists();
             HookMediaKeys(this);
@@ -315,9 +312,7 @@ namespace MusicBox
             string output = ffprobeProcess.StandardOutput.ReadToEnd();
             ffprobeProcess.WaitForExit();
 
-            if (double.TryParse(output.Trim(), out double duration))
-                return duration;
-            return 0;
+            return double.TryParse(output.Trim(), out double duration) ? duration : 0;
         }
 
         private void VolumeSlider_MouseMove(object sender, MouseEventArgs e)
@@ -404,7 +399,7 @@ namespace MusicBox
                 case Key.Down:
                     VolumeSlider.Value = Math.Max(VolumeSlider.Minimum, VolumeSlider.Value - VolumeSlider.LargeChange);
 
-            Handler:
+                Handler:
                     VolumeSlider_MouseMove(null, null);
                     e.Handled = true;
                     break;
@@ -658,7 +653,7 @@ namespace MusicBox
         private void Pause_Click(object sender, RoutedEventArgs e)
         {
             // unpause
-            if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource?.IsCancellationRequested ?? false)
                 PositionSlider_MouseUp(null, null);
             
             // pause
