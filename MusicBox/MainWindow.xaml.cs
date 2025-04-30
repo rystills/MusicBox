@@ -25,6 +25,7 @@ namespace MusicBox
     public partial class MainWindow : Window
     {
         private string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        private string cookieFile = "youtube_cookies.txt";
         private string ytdlPath;
         private string ffmpegPath;
         private string ffprobePath;
@@ -639,9 +640,12 @@ namespace MusicBox
         {
             // download song and add to current playlist
             YoutubeDL ytdl = new() { YoutubeDLPath = ytdlPath, FFmpegPath = ffmpegPath };
-            RunResult<string> res = await ytdl.RunAudioDownload(url, overrideOptions: new OptionSet() { WriteThumbnail = true, ConvertThumbnails = "png" });
+            
+            // cookie file can be exported via https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc
+            RunResult<string> res = await ytdl.RunAudioDownload(url, overrideOptions: new OptionSet() { WriteThumbnail = true, ConvertThumbnails = "png", Cookies = cookieFile, NoRestrictFilenames = true });
+            
             if (string.IsNullOrWhiteSpace(res.Data))
-                MessageBox.Show($"Error: failed to download '{url}'");
+                MessageBox.Show($"Error: failed to download '{url}': {string.Join(" | ", res.ErrorOutput)}");
             else
             {
                 AddSongToPlaylist(res.Data);

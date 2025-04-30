@@ -64,9 +64,9 @@
                 <ComboBoxItem Content="»"/>
                 <ComboBoxItem Content="?"/>
             </ComboBox>
-            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [030/100]" Margin="0, 0, -8, 0"/>
+            <Label Name="VolumeLabel" Grid.Row="1" Grid.Column="2" Content="Volume: [025/100]" Margin="0, 0, -8, 0"/>
             <Slider Name="VolumeSlider" Grid.Row="1" Grid.Column="3" PreviewKeyDown="VolumeSlider_PreviewKeyDown" MouseMove="VolumeSlider_MouseMove"
-                Minimum="0" Maximum="1" Value=".3" LargeChange=".05" SmallChange=".01"
+                Minimum="0" Maximum="1" Value=".25" LargeChange=".05" SmallChange=".01"
                 VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="5"/>
             <Label Name="SongGainLabel" Grid.Row="1" Grid.Column="4" Content="Song Gain: [+000/100]" Margin="5, 0, -8, 0"/>
             <Slider Name="SongGainSlider" Grid.Row="1" Grid.Column="5" PreviewKeyDown="SongGainSlider_PreviewKeyDown" MouseMove="SongGainSlider_MouseMove"
