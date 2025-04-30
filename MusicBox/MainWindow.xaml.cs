@@ -648,11 +648,17 @@ namespace MusicBox
                 MessageBox.Show($"Error: failed to download '{url}': {string.Join(" | ", res.ErrorOutput)}");
             else
             {
-                AddSongToPlaylist(res.Data);
+                string unicodePath = GetSongFileName(new Uri(url).Query.Split('=')[1]);
+                AddSongToPlaylist(unicodePath);
                 ReloadPlaylists((Playlists.SelectedItem as ContentControl).Content.ToString());
-                if (playWhenReady) _ = PlaySongAsync(res.Data);
+                if (playWhenReady) _ = PlaySongAsync(unicodePath);
             }
         }
+
+        // get the song file name from disk as res.Data drops unicode chars
+        private string GetSongFileName(string videoID)
+            => Directory.GetFiles(baseDirectory, $"*[{videoID}]*")
+                        .FirstOrDefault(path => path.EndsWith(".opus", StringComparison.OrdinalIgnoreCase));
 
         private void Pause_Click(object sender, RoutedEventArgs e)
         {
